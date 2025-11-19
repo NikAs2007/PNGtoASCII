@@ -1,5 +1,8 @@
 #include "ConvertorASCII.h"
 
+#define STB_IMAGE_IMPLEMENTATION
+#include "stb_image.h"
+
 int ConvertorASCII::gcd(int a, int b) {
     // Обрабатываем отрицательные числа, используя абсолютное значение
     a = std::abs(a);
@@ -13,7 +16,7 @@ int ConvertorASCII::gcd(int a, int b) {
     return a;
 }
 
-pair<int, int> ConvertorASCII::resize(int width, int height, int k = 10) {
+pair<int, int> ConvertorASCII::resize(int width, int height, int k) {
     // Обрабатываем случай с нулевыми размерами
     if (width == 0 || height == 0) {
         return { 0, 0 };
@@ -115,7 +118,7 @@ string ConvertorASCII::PNGtoASCII(unsigned char* data, int original_width, int o
     return result;
 }
 
-string ConvertorASCII::remake_console(std::string pixels, double aspect_ratio = 2.5) {
+string ConvertorASCII::remake_console(std::string pixels, double aspect_ratio) {
     if (pixels.empty()) return "";
 
     std::vector<std::string> lines;
@@ -172,17 +175,44 @@ string ConvertorASCII::converted(string path_) {
 
     int wm = w, hm = h;
 
-    w /= resize(wm, hm).first;
-    h /= resize(wm, hm).second;
+    w /= resize(wm, hm, stgs.k).first;
+    h /= resize(wm, hm, stgs.k).second;
 
-    cout << remake_console(PNGtoASCII(data, wm, hm, w, h), 2.5) << endl;
-    return remake_console(PNGtoASCII(data, wm, hm, w, h), 2.5);
+    cout << remake_console(PNGtoASCII(data, wm, hm, w, h), stgs.aspect_ratio) << endl;
+    return remake_console(PNGtoASCII(data, wm, hm, w, h), stgs.aspect_ratio);
 }
 
 void ConvertorASCII::asking() {
     while (!stgs.stop) {
+        cout << "Конвертировать [1]\nИзменить настройки [2]\nЗакрыть [3]\nВыбор команды: ";
+        string com;
+        getline(cin, com);
+        if (com == "1") {
+            cout << "Введите путь к файлу: ";
+            string path_;
+            getline(cin, path_);
+            string repath_ = "";
+            for (int i = 0; i < path_.length(); ++i) {
+                if (path_[i] != '\"') repath_ += path_[i];
+            }
+            path_ = repath_;
 
-
-
+            if (exists(path_) && fm.checker(path_, ends)) {
+                converted(path_);
+            }
+            else {
+                cout << "Такого пути не существует или разрешение файла не соответствует доступным (jpg, png).\n\n";
+            }
+        }
+        else if (com == "2"){
+            cout << "Настройки...\n\n";
+        }
+        else if (com == "3") {
+            stgs.stop = true;
+            cout << "Работа завершена.\n";
+        }
+        else {
+            cout << "Такой команды нет!\n\n";
+        }
     }
 }
