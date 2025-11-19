@@ -222,7 +222,21 @@ void ConvertorASCII::asking() {
                 }
             }
             else if (choice == "2") {
-                cout << ".";
+                cout << "Введите соотношение сторон - вытянутость арта (десятичное число, рекомендуемо 2.5): ";
+                getline(cin, choice);
+                bool f = true;
+                for (int i = 0; i < choice.length(); ++i) {
+                    if (f && !(isdigit(choice[i]) || choice[i] == '.')) f = false;
+                }
+                if (f) {
+                    if (stoi(choice) < 0.5) stgs.aspect_ratio = 0.5;
+                    else if (stoi(choice) > 5) stgs.aspect_ratio = 5;
+                    else stgs.aspect_ratio = stoi(choice);
+                    cout << "Настройки сохранены. \n\n";
+                }
+                else {
+                    cout << "Введено недопустимое значение!\n\n";
+                }
             }
             else {
                 cout << "Отмена.\n\n";
