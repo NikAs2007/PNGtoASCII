@@ -201,7 +201,7 @@ void ConvertorASCII::asking() {
             }
         }
         else if (com == "2"){
-            cout << "Задать максимальную ширину Арта [1]\nЗадать соотношение сторон [2]\nОтмена [любой символ]\nВвод: ";
+            cout << "Задать максимальную ширину Арта (Сейчас - " << stgs.max_w << " ) [1]\nЗадать соотношение сторон (Сейчас - " << stgs.aspect_ratio <<") [2]\nОтмена [любой символ]\nВвод: ";
             string choice;
             getline(cin, choice);
             if (choice == "1") {
@@ -212,7 +212,9 @@ void ConvertorASCII::asking() {
                     if (f && !isdigit(choice[i])) f = false;
                 }
                 if (f) {
-                    stgs.max_w = stoi(choice);
+                    if (stoi(choice) < 1) stgs.max_w = 1;
+                    else if (stoi(choice) > 750) stgs.max_w = 750;
+                    else stgs.max_w = stoi(choice);
                     cout << "Настройки сохранены. \n\n";
                 }
                 else {
