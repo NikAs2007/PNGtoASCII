@@ -207,11 +207,7 @@ void ConvertorASCII::asking() {
             if (choice == "1") {
                 cout << "Введите максимальную ширину Арта (целое число, рекомендуемо от 40 до 400): ";
                 getline(cin, choice);
-                bool f = true;
-                for (int i = 0; i < choice.length(); ++i) {
-                    if (f && !isdigit(choice[i])) f = false;
-                }
-                if (f) {
+                if (is_int(choice)) {
                     if (stoi(choice) < 1) stgs.max_w = 1;
                     else if (stoi(choice) > 750) stgs.max_w = 750;
                     else stgs.max_w = stoi(choice);
@@ -224,14 +220,10 @@ void ConvertorASCII::asking() {
             else if (choice == "2") {
                 cout << "Введите соотношение сторон - вытянутость арта (десятичное число, рекомендуемо 2.5): ";
                 getline(cin, choice);
-                bool f = true;
-                for (int i = 0; i < choice.length(); ++i) {
-                    if (f && !(isdigit(choice[i]) || choice[i] == '.')) f = false;
-                }
-                if (f) {
-                    if (stoi(choice) < 0.5) stgs.aspect_ratio = 0.5;
-                    else if (stoi(choice) > 5) stgs.aspect_ratio = 5;
-                    else stgs.aspect_ratio = stoi(choice);
+                if (is_double(choice)) {
+                    if (stod(choice) < 0.5) stgs.aspect_ratio = 0.5;
+                    else if (stod(choice) > 5) stgs.aspect_ratio = 5;
+                    else stgs.aspect_ratio = stod(choice);
                     cout << "Настройки сохранены. \n\n";
                 }
                 else {

@@ -30,9 +30,31 @@ class ConvertorASCII {
 	string PNGtoASCII(unsigned char* data, int original_width, int original_height, int width_art, int height_art);
 	string remake_console(std::string pixels, double aspect_ratio);
 	string converted(string path_);
+
+	template<typename T>
+	bool can_convert(const std::string& str) {
+		std::istringstream iss(str);
+		T value;
+		return (iss >> value) && (iss.eof());
+	}
+
+	bool is_int(const std::string& str) {
+		return can_convert<int>(str);
+	}
+
+	bool is_float(const std::string& str) {
+		return can_convert<float>(str);
+	}
+
+	bool is_double(const std::string& str) {
+		return can_convert<double>(str);
+	}
+
+	bool is_long(const std::string& str) {
+		return can_convert<long>(str);
+	}
 public:
 	void asking();
 };
-
 
 #endif //CONVERTORASCII_H
