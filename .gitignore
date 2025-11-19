@@ -6,3 +6,5 @@ png/
 *.user
 *.vcxproj
 *.sln
+
+build/
