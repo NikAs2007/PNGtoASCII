@@ -16,7 +16,7 @@ using namespace std;
 class ConvertorASCII {
 	struct Settings {
 		bool stop = false;
-		int k = 10;
+		int max_w = 40;
 		double aspect_ratio = 2.5;
 	};
 
@@ -32,7 +32,6 @@ class ConvertorASCII {
 	string converted(string path_);
 public:
 	void asking();
-
 };
 
 

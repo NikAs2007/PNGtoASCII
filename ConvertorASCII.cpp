@@ -16,27 +16,23 @@ int ConvertorASCII::gcd(int a, int b) {
     return a;
 }
 
-pair<int, int> ConvertorASCII::resize(int width, int height, int k) {
-    // Обрабатываем случай с нулевыми размерами
+pair<int, int> ConvertorASCII::resize(int width, int height, int max_w) {
     if (width == 0 || height == 0) {
         return { 0, 0 };
     }
 
-    // Если ширина уже <= 40, возвращаем исходные размеры
-    if (width <= k) {
+    if (width <= max_w) {
         return { width, height };
     }
 
-    // Вычисляем новую высоту, сохраняя пропорции
-    double scale_factor = (double)k / width;
+    double scale_factor = (double)max_w / width;
     int new_height = static_cast<int>(height * scale_factor);
 
-    // Гарантируем, что высота будет хотя бы 1
     if (new_height < 1) {
         new_height = 1;
     }
 
-    return { k, new_height };
+    return { max_w, new_height };
 }
 
 unsigned char ConvertorASCII::ptouc(unsigned char r, unsigned char g, unsigned char b) {
@@ -175,8 +171,8 @@ string ConvertorASCII::converted(string path_) {
 
     int wm = w, hm = h;
 
-    w /= resize(wm, hm, stgs.k).first;
-    h /= resize(wm, hm, stgs.k).second;
+    w = resize(wm, hm, stgs.max_w).first;
+    h = resize(wm, hm, stgs.max_w).second;
 
     cout << remake_console(PNGtoASCII(data, wm, hm, w, h), stgs.aspect_ratio) << endl;
     return remake_console(PNGtoASCII(data, wm, hm, w, h), stgs.aspect_ratio);
@@ -205,7 +201,30 @@ void ConvertorASCII::asking() {
             }
         }
         else if (com == "2"){
-            cout << "Настройки...\n\n";
+            cout << "Задать максимальную ширину Арта [1]\nЗадать соотношение сторон [2]\nОтмена [любой символ]\nВвод: ";
+            string choice;
+            getline(cin, choice);
+            if (choice == "1") {
+                cout << "Введите максимальную ширину Арта (целое число, рекомендуемо от 40 до 400): ";
+                getline(cin, choice);
+                bool f = true;
+                for (int i = 0; i < choice.length(); ++i) {
+                    if (f && !isdigit(choice[i])) f = false;
+                }
+                if (f) {
+                    stgs.max_w = stoi(choice);
+                    cout << "Настройки сохранены. \n\n";
+                }
+                else {
+                    cout << "Введено недопустимое значение!\n\n";
+                }
+            }
+            else if (choice == "2") {
+                cout << ".";
+            }
+            else {
+                cout << "Отмена.\n\n";
+            }
         }
         else if (com == "3") {
             stgs.stop = true;
