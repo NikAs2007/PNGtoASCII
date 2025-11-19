@@ -1,0 +1,188 @@
+#include "ConvertorASCII.h"
+
+int ConvertorASCII::gcd(int a, int b) {
+    // Обрабатываем отрицательные числа, используя абсолютное значение
+    a = std::abs(a);
+    b = std::abs(b);
+
+    while (b != 0) {
+        int temp = b;
+        b = a % b;
+        a = temp;
+    }
+    return a;
+}
+
+pair<int, int> ConvertorASCII::resize(int width, int height, int k = 10) {
+    // Обрабатываем случай с нулевыми размерами
+    if (width == 0 || height == 0) {
+        return { 0, 0 };
+    }
+
+    // Если ширина уже <= 40, возвращаем исходные размеры
+    if (width <= k) {
+        return { width, height };
+    }
+
+    // Вычисляем новую высоту, сохраняя пропорции
+    double scale_factor = (double)k / width;
+    int new_height = static_cast<int>(height * scale_factor);
+
+    // Гарантируем, что высота будет хотя бы 1
+    if (new_height < 1) {
+        new_height = 1;
+    }
+
+    return { k, new_height };
+}
+
+unsigned char ConvertorASCII::ptouc(unsigned char r, unsigned char g, unsigned char b) {
+    // Коэффициенты восприятия яркости
+    const double red_coef = 0.2126;
+    const double green_coef = 0.7152;
+    const double blue_coef = 0.0722;
+
+    double luminance = red_coef * r + green_coef * g + blue_coef * b;
+
+    // Более подробная градация символов (70 уровней)
+    //const char ascii_chars[] = " .'`^\",:;Il!i><~+_-?][}{1)(|\\/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$";
+    const char ascii_chars[] = " .'`^\",:;<|\\/trW%@$";
+    const int num_chars = sizeof(ascii_chars) - 1;
+
+    int index = static_cast<int>((luminance / 255.0) * (num_chars - 1));
+    index = std::max(0, std::min(index, num_chars - 1));
+
+    return ascii_chars[index];
+}
+
+string ConvertorASCII::PNGtoASCII(unsigned char* data, int original_width, int original_height, int width_art, int height_art) {
+    std::string result;
+    result.reserve(width_art * height_art + height_art); // Резервируем память для эффективности
+
+    // Вычисляем размеры блоков для усреднения
+    double block_width = static_cast<double>(original_width) / width_art;
+    double block_height = static_cast<double>(original_height) / height_art;
+
+    for (int art_y = 0; art_y < height_art; art_y++) {
+        for (int art_x = 0; art_x < width_art; art_x++) {
+            // Определяем границы текущего блока в исходном изображении
+            int start_x = static_cast<int>(art_x * block_width);
+            int start_y = static_cast<int>(art_y * block_height);
+            int end_x = static_cast<int>((art_x + 1) * block_width);
+            int end_y = static_cast<int>((art_y + 1) * block_height);
+
+            // Гарантируем, что блоки не выходят за границы
+            end_x = std::min(end_x, original_width);
+            end_y = std::min(end_y, original_height);
+
+            // Переменные для накопления сумм цветов
+            unsigned long long sum_r = 0, sum_g = 0, sum_b = 0;
+            int pixel_count = 0;
+
+            // Проходим по всем пикселям в текущем блоке
+            for (int y = start_y; y < end_y; y++) {
+                for (int x = start_x; x < end_x; x++) {
+                    // Вычисляем индекс пикселя в массиве data
+                    int pixel_index = (y * original_width + x) * 3;
+
+                    // Суммируем компоненты цвета
+                    sum_r += data[pixel_index];
+                    sum_g += data[pixel_index + 1];
+                    sum_b += data[pixel_index + 2];
+                    pixel_count++;
+                }
+            }
+
+            // Вычисляем средние значения цветов
+            if (pixel_count > 0) {
+                unsigned char avg_r = static_cast<unsigned char>(sum_r / pixel_count);
+                unsigned char avg_g = static_cast<unsigned char>(sum_g / pixel_count);
+                unsigned char avg_b = static_cast<unsigned char>(sum_b / pixel_count);
+
+                // Преобразуем средний цвет в символ ASCII
+                result += ptouc(avg_r, avg_g, avg_b);
+            }
+            else {
+                // Если блок пустой, используем пробел
+                result += ' ';
+            }
+        }
+
+        // Добавляем перевод строки после каждой строки арта
+        result += '\n';
+    }
+
+    return result;
+}
+
+string ConvertorASCII::remake_console(std::string pixels, double aspect_ratio = 2.5) {
+    if (pixels.empty()) return "";
+
+    std::vector<std::string> lines;
+    std::stringstream ss(pixels);
+    std::string line;
+
+    while (std::getline(ss, line)) {
+        lines.push_back(line);
+    }
+
+    if (lines.empty()) return "";
+
+    int original_width = lines[0].length();
+    int new_width = static_cast<int>(std::round(original_width * aspect_ratio));
+
+    std::string result;
+
+    for (const auto& original_line : lines) {
+        std::string stretched_line;
+        stretched_line.reserve(new_width);
+
+        // Используем линейную интерполяцию для более плавного растяжения
+        for (int i = 0; i < new_width; i++) {
+            double pos = static_cast<double>(i) / aspect_ratio;
+            int original_index = static_cast<int>(pos);
+
+            if (original_index < original_line.length()) {
+                stretched_line += original_line[original_index];
+            }
+            else {
+                stretched_line += ' '; // Заполнитель для выравнивания
+            }
+        }
+
+        result += stretched_line + "\n";
+    }
+
+    if (!result.empty() && result.back() == '\n') {
+        result.pop_back();
+    }
+
+    return result;
+}
+
+string ConvertorASCII::converted(string path_) {
+    const char* filename = path_.c_str();
+    int w, h, c;
+    unsigned char* data = stbi_load(filename, &w, &h, &c, 0);
+
+    if (!data) {
+        cout << "error to load";
+        return "error";
+    }
+
+    int wm = w, hm = h;
+
+    w /= resize(wm, hm).first;
+    h /= resize(wm, hm).second;
+
+    cout << remake_console(PNGtoASCII(data, wm, hm, w, h), 2.5) << endl;
+    return remake_console(PNGtoASCII(data, wm, hm, w, h), 2.5);
+}
+
+void ConvertorASCII::asking() {
+    while (!stgs.stop) {
+
+
+
+    }
+}
