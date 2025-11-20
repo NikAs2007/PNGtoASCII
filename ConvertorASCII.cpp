@@ -43,8 +43,6 @@ unsigned char ConvertorASCII::ptouc(unsigned char r, unsigned char g, unsigned c
 
     double luminance = red_coef * r + green_coef * g + blue_coef * b;
 
-    // Более подробная градация символов (70 уровней)
-    //const char ascii_chars[] = " .'`^\",:;Il!i><~+_-?][}{1)(|\\/tfjrxnuvczXYUJCLQ0OZmwqpdbkhao*#MW&8%B@$";
     const char ascii_chars[] = " .'`^\",:;<|\\/trW%@$";
     const int num_chars = sizeof(ascii_chars) - 1;
 

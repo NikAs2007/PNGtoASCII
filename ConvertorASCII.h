@@ -22,7 +22,7 @@ class ConvertorASCII {
 
 	Settings stgs;
 	FileManagerBK fm;
-	vector<string> ends = { "*.jpg", ".png" };
+	vector<string> ends = { "*.jpg", "*.png" };
 
 	int gcd(int a, int b);
 	pair<int, int> resize(int width, int height, int k);
